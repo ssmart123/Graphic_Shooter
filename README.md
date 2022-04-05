@@ -690,7 +690,7 @@ public class IKTest : MonoBehaviour
 
     
     
-## 5. 스킬 사용 및 사망
+## 4. 스킬 사용 및 사망
 
 https://user-images.githubusercontent.com/63942174/161756801-dbdc0365-601e-4c8a-9422-8e3b5a6fe763.mp4
 
