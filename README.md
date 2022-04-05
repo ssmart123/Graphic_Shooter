@@ -282,6 +282,7 @@ public class CameraCtrl : MonoBehaviour
     
 ## 3. 캐릭터 움직임 및 총 발사
 https://user-images.githubusercontent.com/63942174/161752860-2dc177d2-564c-492e-beea-37f48dda2b0d.mp4
+    
 https://user-images.githubusercontent.com/63942174/161752923-8e894d14-6a82-47d8-a16c-132ab0e4d717.mp4
 
 
