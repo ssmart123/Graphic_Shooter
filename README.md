@@ -15,7 +15,7 @@ https://user-images.githubusercontent.com/63942174/161748121-b4f0eb94-e665-4e2f-
     맵씬과 플레이어씬을 분리해 놔서 UI를 적용하기 편하도록 만들었습니다.
 
 <details>
-    <summary>타이틀화면</summary>
+    <summary>타이틀화면(LobbyMgr)</summary>
   
 ``` C#
     using System.Collections;
@@ -96,9 +96,62 @@ public IEnumerator BlinkTextAlpha2()
 }
 
 #endregion
+}
     
 ```
     
  </details>
 
 
+
+    
+## 2. 마우스 감도 설정
+https://user-images.githubusercontent.com/63942174/161751139-322bc8fc-4928-4eb1-8f45-94a5d8649734.mp4
+    
+     인게임에서 ESC를 누르면 설정창이 열립니다. 설정창이 열린 동안엔 TimeScale을 0으로해서 
+    게임이 일시정지 되도록 구현하였습니다.
+     설정 화면에서는 마우스의 좌우, 수직 감도와 포스트프로세싱 강도를 조절할 수 있도록 하였습니다.
+     나가기 버튼을 누르면 타이틀 화면으로 돌아갑니다.
+
+<details>
+    <summary>타이틀화면</summary>
+  
+``` C#
+    
+    using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class CameraCtrl : MonoBehaviour
+{
+    
+    public Slider SliderH;  // 마우스 좌우감도 슬라이더
+    public Slider SliderV;  // 마우스 상하감도 슬라이더
+    public Text ValueH;     // 마우스 좌우감도 값
+    public Text ValueV;     
+    
+```
+
+
+
+    
+ </details>
+    
+    
+    
+## 1. 타이틀 화면
+https://user-images.githubusercontent.com/63942174/161748121-b4f0eb94-e665-4e2f-a31b-f1f2c67a9a43.mp4
+
+    타이틀 화면입니다. 아무 키나 누른 후 START버튼을 누르면 게임이 시작되게 됩니다.
+    맵씬과 플레이어씬을 분리해 놔서 UI를 적용하기 편하도록 만들었습니다.
+
+<details>
+    <summary>타이틀화면</summary>
+  
+``` C#
+    
+    
+```
+    
+ </details>
