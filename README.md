@@ -581,36 +581,30 @@ public class HumanBone
 
 public class IKTest : MonoBehaviour
 {
+    // 총기의 손 위치
     [Header("WeaponHandle")]
     public Transform LeftHandle;
     public Transform RightHandle;
-
-    public Transform AimSpot;
-    public Vector3 CheastOffset;
-    public Vector3 HeadOffset;
-
+    
     private Transform spine;
     private Transform head;
 
-
-
+    public Transform targetTransform;   // 타겟 위치
+    public Transform aimTransform;      // 총 견착 위치
+    public Transform Headbone;          // 머리 본 위치
+    
     private Animator playerAnimator;
 
-    public Transform targetTransform;
-    public Transform aimTransform;
-    public Transform Headbone;
+    public int iterations = 10;     // 반복횟수
+    public float weight = 1.0f;     // 보정률
 
-    public int iterations = 10;   // 반복횟수
-    public float weight = 1.0f;
-
-    public HumanBone[] humanBones;  // 본의 갯수
+    public HumanBone[] humanBones;  // 본의 갯수 배열
     Transform[] boneTransforms;  // 설정한 본에 해당되는 트렌스폼
 
     // Start is called before the first frame update
     void Start()
     {
         playerAnimator = GetComponent<Animator>();
-
         spine = playerAnimator.GetBoneTransform(HumanBodyBones.Spine);
 
 
@@ -625,14 +619,12 @@ public class IKTest : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-
+        // 사망시 움직이지 못하도록
         if (GameMgr.s_GameState == GameState.GameEnd) 
             return;
-
-
+                                                  
         // 견착
         Vector3 targetPosition = targetTransform.position;  // 타겟의 위치를 가져온다.
-
 
         for (int i = 0; i < iterations; i++)
         {
@@ -640,17 +632,18 @@ public class IKTest : MonoBehaviour
             {
                 Transform bone = boneTransforms[j];
                 float boneWeight = humanBones[j].weight * weight;
+                // 총이 에임을 바라보도록 만든다.
                 AimAtTarget(bone, aimTransform, targetPosition, boneWeight);
             }
 
             Transform hashs = boneTransforms[4];
-
+            // 머리가 에임을 바라보도록 한다.
             AimAtTarget(hashs, Headbone, targetPosition,weight);
         }
 
     }
 
-    // 
+    // 타겟을 바라보도록 하는 메소드
     private void AimAtTarget(Transform bone,Transform aimPosition, Vector3 targetPosition, float weight)
     {
        // Vector3 aimDirection = aimTransform.forward;    // 에임의 전방벡터
@@ -663,9 +656,11 @@ public class IKTest : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        // 어깨와 에임을 잇는 선
         Gizmos.DrawLine(aimTransform.position, targetTransform.position);
     }
 
+    // 팔의 IK를 적용
     private void OnAnimatorIK(int layerIndex)
     {
 
