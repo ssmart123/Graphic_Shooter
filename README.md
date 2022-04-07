@@ -1,5 +1,7 @@
 ![GSPreview](https://user-images.githubusercontent.com/63942174/162142242-c96194ea-1e1c-4acb-ad6b-906b6380782e.PNG)
 # <Graphic_Shooter>  
+외계 공장에서 몰려드는 적을 처치하고 최대한 오랫동안 살아남으세요!
+
 IK애니메이션을 이용한 TPS게임입니다.
 
 <게임 방법>
