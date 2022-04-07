@@ -1,3 +1,4 @@
+![GSPreview](https://user-images.githubusercontent.com/63942174/162142242-c96194ea-1e1c-4acb-ad6b-906b6380782e.PNG)
 # <Graphic_Shooter>  
 IK애니메이션을 이용한 TPS게임입니다.
 
