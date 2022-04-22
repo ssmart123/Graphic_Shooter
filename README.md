@@ -206,9 +206,8 @@ public class TitleMgr : MonoBehaviour
     #endregion
     
 ```
- </details>
-
-
+ </details>  
+ 
 <details>
     <summary>로그인PHP(MySQL)</summary>
     
