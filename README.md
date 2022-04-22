@@ -20,102 +20,34 @@
 ![타이틀-로그인](https://user-images.githubusercontent.com/63942174/164639473-b1f876f1-4723-43ff-b366-ee5bc124237a.png)![타이틀 계정생성](https://user-images.githubusercontent.com/63942174/164639574-31527fe3-3dd3-4fea-bfcd-bd790ad022b2.png)
 
 
-    타이틀 화면입니다. 아무 키나 누른 후 START버튼을 누르면 게임이 시작되게 됩니다.
-    맵씬과 플레이어씬을 분리해 놔서 UI를 적용하기 편하도록 만들었습니다.
+    타이틀 화면입니다. 아이디를 입력하여 게임에 접속할 수 있습니다. 
+    계정이 없다면 계정생성 버튼을 누르고 아이디와 닉네임, 비밀번호를 입력하면 데이터베이스에서 
+    중복되는 아이디나 닉네임이 없는지 확인하고 새로운 아이디를 생성합니다.
+    
 
 <details>
-    <summary>타이틀화면(LobbyMgr)</summary>
+    <summary>타이틀화면-웹데이터베이스 정보 받기</summary>
   
 ``` C#
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.UI;
-
-    public class LobbyMgr : MonoBehaviour
-{
-    [Header("오브젝트")]
-    public GameObject m_Title_Root;
-    public GameObject m_StartMenu;
-    
-    [Header("텍스트")]
-    public Text m_Title_PressKey;
-    
-    [Header("버튼")]
-    public Button m_Start_Btn;
-    public Button m_Exit_Btn;
-    
-    private bool isKeyClick = false;
-    
-    
-    void Start()
-    {
-    StartCoroutine(BlinkTextAlpha());
-    
-    if (m_Start_Btn != null)
-            m_Start_Btn.onClick.AddListener(StartBtnClick);
-        if (m_Exit_Btn != null)
-            m_Exit_Btn.onClick.AddListener(() =>
-            {
-#if  UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-#else
-                Application.Quit();
-#endif
-            });
-     }
-    
-    
-    private void Update()
-    {
-        if (Input.anyKeyDown && !isKeyClick)
-        {
-            StopAllCoroutines();
-            isKeyClick = true;
-            m_Title_Root.SetActive(false);
-            m_StartMenu.SetActive(true);
-        }
-    }
-    
-    
-#region 글자 점멸 코루틴
-
-public IEnumerator BlinkTextAlpha()
-{ 
-   m_Title_PressKey.color = new Color(m_Title_PressKey.color.r, m_Title_PressKey.color.g, m_Title_PressKey.color.b, 0);
-
-
-    while (m_Title_PressKey.color.a < 1.0f)
-    {
-        m_Title_PressKey.color = new Color(m_Title_PressKey.color.r, m_Title_PressKey.color.g, m_Title_PressKey.color.b, m_Title_PressKey.color.a + (Time.deltaTime/2 ));
-        yield return null;
-    }
-
-    StartCoroutine(BlinkTextAlpha2());
-}
-public IEnumerator BlinkTextAlpha2()
-{
-    m_Title_PressKey.color = new Color(m_Title_PressKey.color.r, m_Title_PressKey.color.g, m_Title_PressKey.color.b, 1);
-    while (m_Title_PressKey.color.a > 0.0f)
-    {
-        m_Title_PressKey.color = new Color(m_Title_PressKey.color.r, m_Title_PressKey.color.g, m_Title_PressKey.color.b, m_Title_PressKey.color.a - (Time.deltaTime/2 ));
-        yield return null;
-    }
-    StartCoroutine(BlinkTextAlpha());
-}
-
-#endregion
-}
     
 ```
     
  </details>
 
 
+    
+## 2. 카메라 이동 및 마우스 감도 설정 
+    
+     인게임에서 ESC를 누르면 설정창이 열립니다. 설정창이 열린 동안엔 TimeScale을 0으로해서 
+    게임이 일시정지 되도록 구현하였습니다.
+     설정 화면에서는 마우스의 좌우, 수직 감도와 포스트프로세싱 강도를 조절할 수 있도록 하였습니다.
+     나가기 버튼을 누르면 타이틀 화면으로 돌아갑니다.
+
+    
+    
 
     
 ## 2. 카메라 이동 및 마우스 감도 설정 
-https://user-images.githubusercontent.com/63942174/161751139-322bc8fc-4928-4eb1-8f45-94a5d8649734.mp4
     
      인게임에서 ESC를 누르면 설정창이 열립니다. 설정창이 열린 동안엔 TimeScale을 0으로해서 
     게임이 일시정지 되도록 구현하였습니다.
