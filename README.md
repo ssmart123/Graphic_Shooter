@@ -259,8 +259,11 @@ public class TitleMgr : MonoBehaviour
 	</details>
 
 
+    
+
 <details>
-    <summary>계정생성PHP(MySQL)</summary>
+    <summary>계정생성 PHP(MySQL)</summary>
+  
 ``` MySQL
 <?php
 	$u_id  = $_POST[ "Input_user" ]; 
@@ -299,8 +302,8 @@ public class TitleMgr : MonoBehaviour
 	mysqli_close($con);
 
 ?>
-	```
-	</details>      
+```
+</details>      
     
     
 ## 2. 로비 화면
