@@ -255,8 +255,8 @@ public class TitleMgr : MonoBehaviour
 	mysqli_close($con);
 ?>
 
-	```
-	</details>
+```
+</details>
 
 
     
