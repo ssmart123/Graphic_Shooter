@@ -332,7 +332,6 @@ public class UserInfo
 	
 public class LobbyMgr : MonoBehaviour
 {	
-````````````````````
     // 데이터를 교환하기 위한 URL
     private string Url_GetRanking = "http://ssmart123.dothome.co.kr/_GraphicShooter/GS_GetRanking.php";
 
@@ -465,8 +464,10 @@ public class LobbyMgr : MonoBehaviour
 ```
 </details>
     
+	
 <details>
 	<summary>유저 데이터를 가져오고 정렬</summary>
+	
 ``` MySQL
 <?php
 	$u_id = $_POST["input_user"];
