@@ -316,7 +316,7 @@ public class TitleMgr : MonoBehaviour
 
     
 <details>
-    <summary>유저 데이터를 가져오고 정렬</summary>
+    <summary>유저 데이터를 가져오고 정렬 (C#)</summary>
   
 ``` C#
 using SimpleJSON; 
@@ -466,7 +466,7 @@ public class LobbyMgr : MonoBehaviour
     
 	
 <details>
-	<summary>유저 데이터를 가져오고 정렬</summary>
+	<summary>유저 데이터 정렬 (MySQL)</summary>
 	
 ``` MySQL
 <?php
