@@ -38,6 +38,7 @@ namespace SSM
         private bool isMoveCrouch = false;
         private bool isGround = true;
         private bool isAim = false;
+        public bool IsAimP { get { return isAim; } }
 
         // 컴포넌트 연결
         public Camera playerCamera = null;
@@ -48,12 +49,6 @@ namespace SSM
         private Animator playerAnimator;
         public GunCtrl gunCtrl = null;
         public GameMgr gameMgr = null;
-
-        public bool isAimP
-        {
-            get { return isAim; }
-            set { isAim = value; }
-        }
 
         private void Awake()
         {
@@ -250,11 +245,11 @@ namespace SSM
         }
         private void TryAim()
         {
-            isAimP = !isAimP;
+            isAim = !isAim;
         }
         private void AimChange()
         {
-            if (isAimP == true)
+            if (isAim == true)
                 rigAimLayer.weight += Time.deltaTime / m_AimDuration;
             else
                 rigAimLayer.weight -= Time.deltaTime / m_AimDuration;

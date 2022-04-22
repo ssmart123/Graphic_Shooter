@@ -109,7 +109,7 @@ public class CameraCtrl : MonoBehaviour
 
     private void ChangeStateValue()
     {
-        if (m_PlayerCtrl.isAimP == true)
+        if (m_PlayerCtrl.IsAimP == true)
         {
             m_hight = 1.8f;
             m_Dist_Aim = 0.5f;
