@@ -249,10 +249,13 @@
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.1f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
     </Reference>
     <Reference Include="I18N.CJK">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Assets/Plugins/I18N.CJK.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Assets/Plugins/I18N.CJK.dll</HintPath>
     </Reference>
     <Reference Include="I18N">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Assets/Plugins/I18N.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Assets/Plugins/I18N.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Unsafe">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/PackageCache/com.unity.burst@1.1.1/Unity.Burst.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.1f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
@@ -600,37 +603,55 @@
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.1f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Burst.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Editor">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Burst.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Animation.Rigging">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Animation.Rigging.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Editor">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Animation.Rigging.Editor">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Animation.Rigging.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics.Editor">
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
-      <HintPath>C:/Users/Shin/Desktop/SBS게임아카데미 평가 내역/포트폴리오/Graphic_Shooter/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+      <HintPath>C:/Users/Shin/Desktop/GitHub/Graphic_Shooter/Graphic_Shooter/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup></ItemGroup>
