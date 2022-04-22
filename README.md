@@ -37,7 +37,7 @@
 
     
 ## 2. 로비 화면
-    ![로비](https://user-images.githubusercontent.com/63942174/164644378-517e2c35-bc81-4f2e-ad3e-fb3b0833c897.png)![로비-플레이방법](https://user-images.githubusercontent.com/63942174/164644393-d572bd9d-1141-413b-9176-b30634232f29.png)
+![로비](https://user-images.githubusercontent.com/63942174/164644378-517e2c35-bc81-4f2e-ad3e-fb3b0833c897.png)![로비-플레이방법](https://user-images.githubusercontent.com/63942174/164644393-d572bd9d-1141-413b-9176-b30634232f29.png)
 
 
      데이터베이스에서 가져온 정보를 점수가 높은 순서대로 나열하였습니다. 자신의 등수는 초록색글씨로 표시하였습니다.
