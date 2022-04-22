@@ -1,4 +1,5 @@
-![GSPreview](https://user-images.githubusercontent.com/63942174/162142242-c96194ea-1e1c-4acb-ad6b-906b6380782e.PNG)
+![공격](https://user-images.githubusercontent.com/63942174/164636382-cd35fef6-5289-4a51-aca5-6f9034341042.png)
+
 # 🎮Graphic Shooter🎮  
 
 외계 공장에서 몰려드는 적을 처치하며 처철한 사투속에서 살아남으세요!
