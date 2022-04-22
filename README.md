@@ -209,7 +209,7 @@ public class TitleMgr : MonoBehaviour
  </details>  
  
 <details>
-    <summary>로그인PHP(MySQL)</summary>
+    <summary>로그인 PHP(MySQL)</summary>
     
 ``` MySQL
 <?php
@@ -506,11 +506,10 @@ public class CameraCtrl : MonoBehaviour
     
     
 ## 3. 캐릭터 조작 및 총 발사
-https://user-images.githubusercontent.com/63942174/161752860-2dc177d2-564c-492e-beea-37f48dda2b0d.mp4
-    
-https://user-images.githubusercontent.com/63942174/161752923-8e894d14-6a82-47d8-a16c-132ab0e4d717.mp4
+![인게임](https://user-images.githubusercontent.com/63942174/164652278-bf1ebc9f-1a95-47a6-8854-41a8e06c87bb.png)![인게임화면](https://user-images.githubusercontent.com/63942174/164652328-bf1025d9-c57e-4932-aeb3-7291d567546f.png)
+![공격](https://user-images.githubusercontent.com/63942174/164652343-1bf3d4c9-1ac0-45f6-b679-801b43b7fc19.png)![스킬사용](https://user-images.githubusercontent.com/63942174/164652362-5392bcda-415b-42fb-8489-8ed6e8811379.png)
 
-    
+	
     캐릭터 조작과 총 발사입니다. IK를 이용하여 애니메이션을 크게 수정하지 않고 총을 잡고
     화면 중앙의 에임에 총구를 향하도록 구현하였습니다.
 
