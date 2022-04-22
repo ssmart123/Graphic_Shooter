@@ -206,10 +206,100 @@ public class TitleMgr : MonoBehaviour
     #endregion
     
 ```
-    
  </details>
 
 
+<details>
+    <summary>로그인PHP(MySQL)</summary>
+    
+``` MySQL
+<?php
+	$u_id = $_POST[ "Input_user" ]; 
+	$u_pw = $_POST[ "Input_pass" ];
+
+	$con = mysqli_connect("localhost", "ssmart123", "Helkas2073!", "ssmart123");
+
+	if(!$con)
+		die( "Could not Connect" . mysqli_connect_error() ); 
+
+	$check = mysqli_query($con, "SELECT * FROM GraphicShooter WHERE user_id = '".$u_id."'" );	
+	$numrows = mysqli_num_rows($check);
+
+	if($numrows == 0)
+	{ 
+		die("ID does not exist. \n");
+	}
+
+	$row = mysqli_fetch_assoc($check); 
+	if($row)
+	{
+		if($u_pw == $row["user_pw"])
+		{
+			//JSON 생성을 위한 변수
+			$RowDatas = array();
+			$RowDatas["user_nick"] = $row["user_nick"];		
+			$RowDatas["best_score"] = $row["best_score"];
+			$output = json_encode($RowDatas, JSON_UNESCAPED_UNICODE);	//PHP 5.4 이상 버전에서 한글 않깨지게..
+			//JSON 파일 생성	
+	
+			//출력
+			echo $output;
+			echo "\n";
+			echo "Login-Success!!";
+		}
+		else
+		{
+			die("Pass does not Match. \n");
+		}
+	}
+
+	mysqli_close($con);
+?>
+```
+    </details>
+
+<details>
+    <summary>계정생성PHP(MySQL)</summary>
+``` MySQL
+<?php
+	$u_id  = $_POST[ "Input_user" ]; 
+	$nick   = $_POST[ "Input_nick" ];
+	$u_pw = $_POST[ "Input_pass" ];
+
+	$con = mysqli_connect("localhost", "ssmart123", "Helkas2073!", "ssmart123");
+
+	if(!$con)
+		die( "Could not Connect" . mysqli_connect_error() ); 
+	
+	$check = mysqli_query($con, "SELECT user_id FROM GraphicShooter WHERE user_id = '".$u_id."'" );
+	$numrows = mysqli_num_rows($check);
+
+	if($numrows != 0) //즉 0이 아니라는 뜻은 내가 찾는 ID값이 존재한 다는 뜻이다.
+	{
+		die("ID does exist. \n");
+	}
+
+	$check = mysqli_query($con, "SELECT user_nick FROM GraphicShooter WHERE user_nick = '".$nick."'" );
+	$numrows = mysqli_num_rows($check);
+
+	if($numrows != 0)  //즉 0이 아니라는 뜻은 내가 찾는 Nickname값이 존재한 다는 뜻이다.
+	{
+		die("Nickname does exist. \n");
+	}
+
+	$Result = mysqli_query($con, 
+	"INSERT INTO GraphicShooter (user_id, user_nick, user_pw) VALUES ('".$u_id."',  '".$nick."', '".$u_pw."');" );
+
+	if($Result)
+		die("Create Success. \n");
+	else
+		die("Create error. \n");		
+
+	mysqli_close($con);
+
+?>
+```
+    </details>    
     
 ## 2. 로비 화면
 ![로비](https://user-images.githubusercontent.com/63942174/164644378-517e2c35-bc81-4f2e-ad3e-fb3b0833c897.png)![로비-플레이방법](https://user-images.githubusercontent.com/63942174/164644393-d572bd9d-1141-413b-9176-b30634232f29.png)
