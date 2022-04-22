@@ -56,6 +56,11 @@ namespace SSM
 
         bool isNetUpdateLock = false;
 
+
+        private void Awake()
+        {
+            s_GameState = GameState.GameIng;
+        }
         void Start()
         {
             DispScore(0);
@@ -215,14 +220,12 @@ namespace SSM
             GlobalValue.g_Unique_ID = "";
             GlobalValue.g_UserNick = "";
             GlobalValue.g_BestScore = 0;
-            s_GameState = GameState.GameIng;
             UnityEngine.SceneManagement.SceneManager.LoadScene("Title");
         }
 
         private void GoToLobby()
         {
             Time.timeScale = 1;
-            s_GameState = GameState.GameIng;
             UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
         }
        

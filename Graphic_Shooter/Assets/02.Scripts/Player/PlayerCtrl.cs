@@ -106,7 +106,7 @@ namespace SSM
                     m_PlayerApplySpeed = m_PlayerSprintSpeed;
                     rigSprintLayer.weight += Time.deltaTime / m_SprintDuration;
                     isMoveCrouch = false;
-                    isAimP = false;
+                    isAim = false;
                     break;
 
                 case PlayerState.Crouch:
@@ -117,7 +117,7 @@ namespace SSM
                 case PlayerState.Jump:
                     isMoveCrouch = false;
                     isMoveSprint = false;
-                    isAimP = false;
+                    isAim = false;
                     break;
             }
 
@@ -142,6 +142,7 @@ namespace SSM
                     playerAnimator.SetBool("isSprint", isMoveSprint);
                     playerAnimator.SetBool("isCrouch", isMoveCrouch);
                     playerAnimator.SetBool("isGround", isGround);
+                    playerAnimator.SetBool("isAim", isAim);
                     break;
 
                 case PlayerState.Crouch:
@@ -155,6 +156,7 @@ namespace SSM
                     playerAnimator.SetBool("isSprint", isMoveSprint);
                     playerAnimator.SetBool("isCrouch", isMoveCrouch);
                     playerAnimator.SetBool("isGround", isGround);
+                    playerAnimator.SetBool("isAim", isAim);
                     break;
             }
         }
