@@ -316,22 +316,233 @@ public class TitleMgr : MonoBehaviour
 
     
 <details>
-    <summary>CameraCtrl</summary>
+    <summary>유저 데이터를 가져오고 정렬</summary>
   
 ``` C#
-    
+using SimpleJSON; 
+using UnityEngine.Networking;
+	
+// 유저 정보 클래스	
+public class UserInfo
+{
+    public string m_ID = "";
+    public string m_Nick = "";
+    public int m_BestScore = 0;
+}
+	
+public class LobbyMgr : MonoBehaviour
+{	
+````````````````````
+    // 데이터를 교환하기 위한 URL
+    private string Url_GetRanking = "http://ssmart123.dothome.co.kr/_GraphicShooter/GS_GetRanking.php";
+
+    [SerializeField] private float m_LeaderboardResetDelay = 5.0f;	// 리더보드 리셋 딜레이
+    private float m_RefreshTime = 5.0f;
+	
+    // 가져온 유저정보를 리스트로 임시 할당
+    List<UserInfo> m_UserList = new List<UserInfo>();	
+    // 랭킹 저장
+    private int m_MyRank = 0;
+    // 순위를 표시할 UIPrefab
+    GameObject[] a_RankNode = null;
+
+    // 코루틴에서 오브젝트 반복 생성을 막기 위한 상태변수
+    bool islock = false;
+	
+    private void GetLeaderbord()
+    {
+        StartCoroutine(RefreshRankingCo());
+    }
+    // 데이터베이스 유저정보를 가져옴
+    IEnumerator RefreshRankingCo()
+    {
+        if (GlobalValue.g_Unique_ID == "")
+            yield break;
+
+        WWWForm form = new WWWForm();
+        form.AddField("input_user", GlobalValue.g_Unique_ID, System.Text.Encoding.UTF8);
+
+	// 포스트방식으로 데이터 전송
+        UnityWebRequest a_www = UnityWebRequest.Post(Url_GetRanking, form);
+        yield return a_www.SendWebRequest();
+
+	
+        if (a_www.error == null) //에러가 나지 않았을 때 동작
+        {
+            System.Text.Encoding enc = System.Text.Encoding.UTF8;
+            //<--이렇게 해야 안드로이드에서 한글이 않깨진다.
+            string a_ReStr = enc.GetString(a_www.downloadHandler.data);
+
+            if (a_ReStr.Contains("Get Ranking List Success~") == true)
+            {
+                // 점수를 표시하는 함수를 호출
+                GetRanking(a_ReStr);
+            }
+        }
+        else
+        {
+            Debug.Log(a_www.error);
+        }
+    }
+    // 가져온 유저데이터를 정렬하기		     
+    private void GetRanking(string a_ReStr)
+    {
+        if (a_ReStr.Contains("RkList") == false)
+            return;
+        m_UserList.Clear();
+
+        //JSON 파일 파싱
+        var N = JSON.Parse(a_ReStr);
+
+        int ranking = 0;
+        UserInfo a_UserNd;
+
+        // 유저 리스트 채움
+        for (int i = 0; i < N["RkList"].Count; i++)
+        {
+            ranking = i + 1;
+            string userID = N["RkList"][i]["user_id"];
+            string user_nick = N["RkList"][i]["user_nick"];
+            int best_score = N["RkList"][i]["best_score"].AsInt;
+
+
+            a_UserNd = new UserInfo();
+            a_UserNd.m_ID = userID;
+            a_UserNd.m_Nick = user_nick;
+            a_UserNd.m_BestScore = best_score;
+            m_UserList.Add(a_UserNd);
+
+        }
+
+        if (RankNodePrefab == null)
+            return;
+
+        string a_RankingNodeText = "";
+
+        a_RankNode = new GameObject[m_UserList.Count];
+
+	// UserList에 들어있는 정보를 RankNode에 넣기 위한 반복문
+        for (int i = 0; i < m_UserList.Count; i++)
+        {
+            if(islock == false)
+            a_RankNode[i] = (GameObject)Instantiate(RankNodePrefab, RankScrollContent.transform, false);
+
+
+            a_RankingNodeText = "";
+
+            // 내 ID와 유저 정보가 일치할 때 녹색으로 강조					     
+            if (m_UserList[i].m_ID == GlobalValue.g_Unique_ID)
+            {
+                GlobalValue.g_BestScore = m_UserList[i].m_BestScore;
+                a_RankingNodeText += "<color=#008000>";
+            }
+            else
+                a_RankingNodeText += "<color=#000000>";
+
+            a_RankingNodeText += m_UserList[i].m_Nick + "\t\t" + (i + 1).ToString() + "등 \n" + "BestScore : " + m_UserList[i].m_BestScore + "</color>";
+
+            RankScrollContent.transform.GetChild(i).GetComponentInChildren<Text>().text = a_RankingNodeText;
+
+	// RankNode가 하나씩만 생성되도록 제한하는 조건
+            if (i == m_UserList.Count - 1)
+                islock = true;
+        }
+
+	// 내 랭크의 Json데이터를 m_MyRank에 대입
+        if (N["my_rank"] != null)
+            m_MyRank = N["my_rank"].AsInt;
+	
+        RefreshMyInfo();
+    }
+    // 로비 상단에 내 정보 표시
+    private void RefreshMyInfo()
+    {
+        Txt_MyRankInfo.text = GlobalValue.g_UserNick + "\t\t" + m_MyRank + "등\n"
+                              + "BestScore : " + GlobalValue.g_BestScore;
+    }
+}
+	
 ```
+</details>
+    
+<details>
+	<summary>유저 데이터를 가져오고 정렬</summary>
+``` MySQL
+<?php
+	$u_id = $_POST["input_user"];
 
+	$con = mysqli_connect("localhost", "ssmart123", "Helkas2073!", "ssmart123");
 
+	if(!$con)
+		die( "Could not Connect" . mysqli_connect_error() ); 
+
+	$check = mysqli_query($con, "SELECT user_id FROM GraphicShooter WHERE user_id = '".$u_id."'" );
+	$numrows = mysqli_num_rows($check);
+
+	if ( !$check || $numrows == 0)
+	{
+ 		die("ID does not exist. \n");
+	}
+
+	$JSONBUFF = array(); 
+
+	$BSList = mysqli_query($con, "SELECT * FROM GraphicShooter ORDER BY best_score DESC LIMIT 0, 10");
+		
+	$rowsCount = mysqli_num_rows($BSList);
+	if (!BSList || $rowsCount == 0)
+	{
+		die("List does not exist. \n");
+	}
+
+	$RowDatas = array();
+	$Return   = array();
+
+	for($i = 0; $i < $rowsCount; $i++)
+	{
+		$a_row = mysqli_fetch_array($BSList);       //행 정보 가져오기
+		if($a_row != false)
+		{
+			$RowDatas["user_id"]   = $a_row["user_id"];     
+			$RowDatas["user_nick"] = $a_row["user_nick"];  
+			$RowDatas["best_score"] = $a_row["best_score"];
+			array_push($Return, $RowDatas); 
+		}
+	}
+
+	$JSONBUFF['RkList'] = $Return;   
+
+	mysqli_query($con, "SET @curRank := 0");
+
+	$check = mysqli_query($con, "SELECT user_id, myrankidx FROM (SELECT user_id, 
+   		 rank() over(ORDER BY best_score DESC) as myrankidx
+   			 FROM GraphicShooter) as CNT 
+  			 	WHERE user_id='".$u_id."'");
+
+	$numrows = mysqli_num_rows($check);
+
+	if (!$check || $numrows == 0)
+	{
+		die("Ranking search failed for ID. \n");
+	}
+
+	if($row = mysqli_fetch_assoc($check))
+	{	
+		$JSONBUFF["my_rank"]   = $row["myrankidx"];   
+		$output = json_encode($JSONBUFF, JSON_UNESCAPED_UNICODE); 
+		echo $output;
+		echo "Get Ranking List Success~";
+	}
+
+	mysqli_close($con);
+?>	
+	
+```
+</details>
+	
+    
 
     
- </details>
-    
-    
-    
-
-    
-## 2. 카메라 이동 및 마우스 감도 설정 
+## 3. 카메라 이동 및 마우스 감도 설정 
     
      인게임에서 ESC를 누르면 설정창이 열립니다. 설정창이 열린 동안엔 TimeScale을 0으로해서 
     게임이 일시정지 되도록 구현하였습니다.
