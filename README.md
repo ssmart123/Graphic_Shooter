@@ -679,8 +679,8 @@ public class LobbyMgr : MonoBehaviour
     
     
 ## 3-2. 캐릭터 이동 및 조작
-![인게임화면](https://user-images.githubusercontent.com/63942174/164652328-bf1025d9-c57e-4932-aeb3-7291d567546f.png)![에임](https://user-images.githubusercontent.com/63942174/164950324-cb303f88-a6af-46ae-9f12-380cbe1d2600.PNG)![앉기](https://user-images.githubusercontent.com/63942174/164950331-0ce82195-3a14-43fd-a32b-a740687efe93.PNG)![점프](https://user-images.githubusercontent.com/63942174/164950339-018619e8-bf64-4e72-a341-ef0415ac8dd8.PNG)
-![공격](https://user-images.githubusercontent.com/63942174/164652343-1bf3d4c9-1ac0-45f6-b679-801b43b7fc19.png)
+![에임](https://user-images.githubusercontent.com/63942174/164950324-cb303f88-a6af-46ae-9f12-380cbe1d2600.PNG)![앉기](https://user-images.githubusercontent.com/63942174/164950331-0ce82195-3a14-43fd-a32b-a740687efe93.PNG)![점프](https://user-images.githubusercontent.com/63942174/164950339-018619e8-bf64-4e72-a341-ef0415ac8dd8.PNG)![공격](https://user-images.githubusercontent.com/63942174/164950431-dd9b4ee6-eb36-407f-80bd-b042c60869a5.png)
+
 
     캐릭터 이동 및 조작입니다. 
     Transform으로 캐릭터가 이동하는 방식을 사용했었으나 벽을 통과하는 문제가 발생했습니다.
