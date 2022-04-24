@@ -679,10 +679,9 @@ public class LobbyMgr : MonoBehaviour
     
     
 ## 3-2. 캐릭터 이동 및 조작
-![인게임](https://user-images.githubusercontent.com/63942174/164652278-bf1ebc9f-1a95-47a6-8854-41a8e06c87bb.png)![인게임화면](https://user-images.githubusercontent.com/63942174/164652328-bf1025d9-c57e-4932-aeb3-7291d567546f.png)
-![공격](https://user-images.githubusercontent.com/63942174/164652343-1bf3d4c9-1ac0-45f6-b679-801b43b7fc19.png)![스킬사용](https://user-images.githubusercontent.com/63942174/164652362-5392bcda-415b-42fb-8489-8ed6e8811379.png)
+![인게임화면](https://user-images.githubusercontent.com/63942174/164652328-bf1025d9-c57e-4932-aeb3-7291d567546f.png)![에임](https://user-images.githubusercontent.com/63942174/164950324-cb303f88-a6af-46ae-9f12-380cbe1d2600.PNG)![앉기](https://user-images.githubusercontent.com/63942174/164950331-0ce82195-3a14-43fd-a32b-a740687efe93.PNG)![점프](https://user-images.githubusercontent.com/63942174/164950339-018619e8-bf64-4e72-a341-ef0415ac8dd8.PNG)
+![공격](https://user-images.githubusercontent.com/63942174/164652343-1bf3d4c9-1ac0-45f6-b679-801b43b7fc19.png)
 
-	
     캐릭터 이동 및 조작입니다. 
     Transform으로 캐릭터가 이동하는 방식을 사용했었으나 벽을 통과하는 문제가 발생했습니다.
     해결방안을 찾다가 AddForce의 무게를 무시하고 일정한 속도로 움직이는 ForceMode.VelocityChange를 사용했습니다.
