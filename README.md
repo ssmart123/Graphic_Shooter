@@ -558,6 +558,7 @@ public class LobbyMgr : MonoBehaviour
     // 카메라가 회전하기 위한 감도
     private float m_SensitiveCurH = 10.0f;
     private float m_SensitiveCurV = 10.0f;
+	
     // 보안수준을 유지하면서 다른곳에서 읽기 및 수정을 하기 위한 프로퍼티
     public float HSensP { get { return m_SensitiveCurH; } set { m_SensitiveCurH = value; } }
     public float VSensP { get { return m_SensitiveCurV; } set { m_SensitiveCurV = value; } }
@@ -568,23 +569,27 @@ public class LobbyMgr : MonoBehaviour
 
     public float m_Dist_Aim = 0.23f;  // 에임과 캐릭터의 거리
     public float m_Dist_Cam = 1.8f;   // 캠과 에임과의 거리
-    float m_CurDist = 1.8f;   // 캠과 에임과의 거리
+    float m_CurDist = 1.8f;  	      // 캠과 에임과의 거리
 	
 	
     private void FixedUpdate()
     {
         CheckCameraDistance();
     }
-    // 에임에서 카메라 방향으로 레이를 쏴서 부딛힐 때의 거리를 구하고 
+	
+    // 에임에서 카메라 방향으로 레이를 쏴서 부딪칠 때의 거리를 구하고 
     // 카메라와 에임과의 거리를 조절한다.
     private void CheckCameraDistance()
     {
+	// 카메라에서 에임을 향하는 방향벡터
         Vector3 a_RayDir = (transform.position - m_AimPivot).normalized;
 
+	// RayCast를 사용하여 부딪친 장소에 hit정보를 가져옴
         if (Physics.Raycast(m_AimPivot, a_RayDir, out hit, m_Dist_Cam + 0.2f))
         {
+	    // 카메라의 거리 조절
             m_CurDist = hit.distance - 0.01f;
-
+	    // 카메라 거리 제약
             if (m_CurDist <= 0.1f)
                 m_CurDist = 0.1f;
         }
@@ -624,16 +629,21 @@ public class LobbyMgr : MonoBehaviour
     // 견착시 카메라의 거리 변경을 위한 메소드
     private void ChangeStateValue()
     {
-        if (m_PlayerCtrl.IsAimP == true)  // 견착상태일때
-        {
+	// 앉기 상태이거나 점프상태일때 높이 조절 
+        if (m_PlayerCtrl.e_PlayerState == PlayerState.Crouch || m_PlayerCtrl.e_PlayerState == PlayerState.Jump)
+            m_hight = 1.2f;
+        else 
             m_hight = 1.8f;
+
+	// 견착상태일 때 에임의 오프셋 조절
+        if (m_PlayerCtrl.IsAimP == true)
+        {
             m_Dist_Aim = 0.5f;
             m_Dist_Cam = 0.9f;
 
         }
-        else		// 일반 상태일때
+        else
         {
-            m_hight = 1.8f;
             m_Dist_Aim = 0.23f;
             m_Dist_Cam = 1.8f;
         }
@@ -646,11 +656,11 @@ public class LobbyMgr : MonoBehaviour
         transform.LookAt(m_AimPivot);
     }
 
-    // 에임피봇 위치 계산
+    // 에임 위치 계산
     Vector3 HorizontalRot(Vector3 a_PlayerPos, float a_hight)
     {
-
         m_AimPivot = a_PlayerPos;
+	// 에임의 높이
         m_AimPivot.y = m_AimPivot.y + a_hight;
 
         // 캐릭터와 AimPivot의 방향과 거리 계산
@@ -686,8 +696,8 @@ public class LobbyMgr : MonoBehaviour
 
 
     캐릭터 이동 및 조작입니다. 
-    Transform으로 캐릭터가 이동하는 방식을 사용했었으나 벽을 통과하는 문제가 발생했습니다.
-    해결방안을 찾다가 AddForce의 무게를 무시하고 일정한 속도로 움직이는 ForceMode.VelocityChange를 사용했습니다.
+    AddForce의 무게를 무시하고 일정한 속도로 움직이는 ForceMode.VelocityChange를 사용했습니다.
+    캐릭터는 카메라의 전방방향을 바라보게 구현하였습니다. 
 
     
 
@@ -696,6 +706,7 @@ public class LobbyMgr : MonoBehaviour
   
 ``` C#
 	
+// 플레이어의 행동상태를 결정하는 enum함수
 public enum PlayerState { Normal = 0, Sprint, Crouch, Jump }
 	
 namespace SSM
@@ -705,7 +716,6 @@ namespace SSM
         // 플레이어 상태
         public PlayerState e_PlayerState = PlayerState.Normal;
 
-	
         // 입력값 저장 변수
         private float m_HInput = 0;
         private float m_VInput = 0;
@@ -718,127 +728,82 @@ namespace SSM
         // 캐릭터 회전 속도
         private float m_RotSpeed = 15f;
         private float m_PlayerApplySpeed = 0;
-        private float m_AimDuration = 0.15f;
-        private float m_SprintDuration = 0.3f;
-
+	
+	// Animatino Rigging 전환 시간
+        private float m_AimDuration = 0.15f; 	  // 에임 상태로 바뀔때까지의 시간
+        private float m_SprintDuration = 0.3f;	  // 달리기 상태로 바뀔때까지의 
+	
+	// 현재 총 발사 딜레이
         private float m_CurFireRate = 0;
 
-        private int m_PlayerCurHP;
-	
-        float a_HPRatio;
 	
         // 상태변수
         private bool isMoveSprint = false;
         private bool isMoveCrouch = false;
         private bool isGround = true;
         private bool isAim = false;
+	// 상태변수 프로퍼티
+        public bool IsMoveCrouchP { get { return isMoveCrouch; } }
         public bool IsAimP { get { return isAim; } }
-	
-	
 	
 	  private void FixedUpdate()
         {
             ChackIsGround();
-            RigidMove();
-	    if(isJump == true && isGround == true)
-		TryJump();
-	
+            RigidMove();	
         }
-
+	
+	// Ray를 캐릭터에서 월드축 Y방향으로 쏴서 바닥을 확인하기
         private void ChackIsGround()
         {
             isGround = Physics.Raycast(transform.position+Vector3.up*0.1f, Vector3.down, capsuleCollider.center.y+ 0.3f);
         }
 	
+	// 리지드바디를 이용한 물리 이동
         private void RigidMove()
         {
 	    // 질량을 무시하고 강체에 즉각적인 속도 변경을 추가합니다.
             rigidBody.AddForce(m_CalcTargetDirection, ForceMode.VelocityChange); 
         }
 	
-        private void TryJump()
-        {
-            e_PlayerState = PlayerState.Jump;
-
-            rigidBody.AddForce(new Vector3(m_SaveJumpDirectino.x, m_PlayerJumpForce, m_SaveJumpDirectino.z), ForceMode.Impulse);
-
-            playerAnimator.SetTrigger("doJump");
-        }
 	
 	
         void Update()
         {
-            StateMoveChange();
             KeyInput();
             CalcMoveDirection();
             PlayerRotation();
+            StateMoveChange();
             StatePlayAnimation();
 
             AimChange();
         }
-	private void StatePlayAnimation()
-        {
-            playerAnimator.SetFloat("Horizontal", m_HInput);
-            playerAnimator.SetFloat("Vertical", m_VInput);
-
-
-            switch (e_PlayerState)
-            {
-                case PlayerState.Normal:
-                    //if(isMoveBlock == true)
-                    playerAnimator.SetBool("isSprint", isMoveSprint);
-                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
-                    playerAnimator.SetBool("isGround", isGround);
-                    playerAnimator.SetBool("isAim", isAim);
-                    break;
-
-                case PlayerState.Sprint:
-                    playerAnimator.SetBool("isSprint", isMoveSprint);
-                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
-                    playerAnimator.SetBool("isGround", isGround);
-                    playerAnimator.SetBool("isAim", isAim);
-                    break;
-
-                case PlayerState.Crouch:
-                    playerAnimator.SetBool("isSprint", isMoveSprint);
-                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
-                    playerAnimator.SetBool("isGround", isGround);
-                    playerAnimator.SetBool("isAim", isAim);
-                    break;
-
-                case PlayerState.Jump:
-                    playerAnimator.SetBool("isSprint", isMoveSprint);
-                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
-                    playerAnimator.SetBool("isGround", isGround);
-                    playerAnimator.SetBool("isAim", isAim);
-                    break;
-            }
-        }
+	
+	// 인풋에 관련된 조건을 한곳에 몰아넣음
         private void KeyInput()
         {
             m_HInput = Input.GetAxis("Horizontal");
             m_VInput = Input.GetAxis("Vertical");
 
+	    // LeftShift를 홀드해서 달리기 실행
             if (Input.GetKey(KeyCode.LeftShift))
                 TrySprint();
+	    // LeftShift에서 손을 때면 달리기 취소
             if (Input.GetKeyUp(KeyCode.LeftShift))
                 CancleSprint();
-
+	    // C버튼을 눌렀을 경우 앉기상태 변경
             if (Input.GetKeyDown(KeyCode.C))
                 TryCrouch();
-
+	    // Space를 누르고 땅에 있을 경우 점프 실행
             if (Input.GetKeyDown(KeyCode.Space) && isGround == true)
-                isJump = true;
-
+                TryJump();
+	    // 마우스 좌클릭을 누르고 있을 시 공격 실행
             if (Input.GetMouseButton(0))
                 TryFire();
-
+	    // 마우스 우클릭을 토글하면 조준상태 변경
             if (Input.GetMouseButtonDown(1))
                 TryAim();
-
-            
         }
-
+	// 카메라 전방방향으로 이동하기 위한 
         private void CalcMoveDirection()
         {
             Vector3 a_CameraForward = playerCamera.transform.forward;
@@ -851,6 +816,7 @@ namespace SSM
 
             m_CalcTargetDirection = new Vector3(m_TargetMoveDirection.x * m_PlayerApplySpeed, -0.3f, m_TargetMoveDirection.z * m_PlayerApplySpeed);
         }
+	
 	private void PlayerRotation()
         {
             if (e_PlayerState == PlayerState.Sprint)
@@ -888,6 +854,7 @@ namespace SSM
             e_PlayerState = PlayerState.Sprint;
             playerAnimator.SetLayerWeight(1, 0);
         }
+	
         private void CancleSprint()
         {
             isMoveSprint = false;
@@ -897,6 +864,7 @@ namespace SSM
 
             playerAnimator.SetLayerWeight(1, 1);
         }
+	
         private void TryCrouch()
         {
             isMoveCrouch = !isMoveCrouch;
@@ -904,6 +872,16 @@ namespace SSM
                 e_PlayerState = PlayerState.Crouch;
             else
                 e_PlayerState = PlayerState.Normal;
+        }
+	
+	
+        private void TryJump()
+        {
+            e_PlayerState = PlayerState.Jump;
+
+            rigidBody.AddForce(new Vector3(m_SaveJumpDirectino.x, m_PlayerJumpForce, m_SaveJumpDirectino.z), ForceMode.Impulse);
+
+            playerAnimator.SetTrigger("doJump");
         }
 	 private void TryFire()
         {
@@ -930,6 +908,78 @@ namespace SSM
             else
                 rigAimLayer.weight -= Time.deltaTime / m_AimDuration;
         }
+		
+	// 캐릭터 상태 
+        private void StateMoveChange()
+        {
+            switch (e_PlayerState)
+            {
+                case PlayerState.Normal:
+                    m_PlayerApplySpeed = m_PlayerRunSpeed;
+                    rigSprintLayer.weight -= Time.deltaTime / m_SprintDuration;
+                    break;
+
+
+                case PlayerState.Sprint:
+                    m_PlayerApplySpeed = m_PlayerSprintSpeed;
+                    rigSprintLayer.weight += Time.deltaTime / m_SprintDuration;
+                    isMoveCrouch = false;
+                    isAim = false;
+                    break;
+
+                case PlayerState.Crouch:
+                    m_PlayerApplySpeed = m_PlayerCrouchSpeed;
+                    isMoveSprint = false;
+                    break;
+
+                case PlayerState.Jump:
+                    isMoveCrouch = false;
+                    isMoveSprint = false;
+                    isAim = false;
+                    break;
+            }
+
+        }
+				  
+	// enum 캐릭터 상태 머신 애니메이션
+	private void StatePlayAnimation()
+        {
+            playerAnimator.SetFloat("Horizontal", m_HInput);
+            playerAnimator.SetFloat("Vertical", m_VInput);
+
+
+            switch (e_PlayerState)
+            {
+                case PlayerState.Normal:
+                    playerAnimator.SetBool("isSprint", isMoveSprint);
+                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
+                    playerAnimator.SetBool("isGround", isGround);
+                    playerAnimator.SetBool("isAim", isAim);
+                    break;
+
+                case PlayerState.Sprint:
+                    playerAnimator.SetBool("isSprint", isMoveSprint);
+                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
+                    playerAnimator.SetBool("isGround", isGround);
+                    playerAnimator.SetBool("isAim", isAim);
+                    break;
+
+                case PlayerState.Crouch:
+                    playerAnimator.SetBool("isSprint", isMoveSprint);
+                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
+                    playerAnimator.SetBool("isGround", isGround);
+                    playerAnimator.SetBool("isAim", isAim);
+                    break;
+
+                case PlayerState.Jump:
+                    playerAnimator.SetBool("isSprint", isMoveSprint);
+                    playerAnimator.SetBool("isCrouch", isMoveCrouch);
+                    playerAnimator.SetBool("isGround", isGround);
+                    playerAnimator.SetBool("isAim", isAim);
+                    break;
+            }
+        }
+	
 	
 ```
     
