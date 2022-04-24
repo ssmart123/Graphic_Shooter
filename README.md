@@ -543,10 +543,13 @@ public class LobbyMgr : MonoBehaviour
     
 
     
-## 3-1. 인게임 카메라 이동 및 마우스 감도 설정 
-    
+## 3-1. 인게임 카메라 이동 및 마우스 감도 설정   
+![벽에 붙었을때](https://user-images.githubusercontent.com/63942174/164950842-07a34cae-20f5-40f8-8a82-7064b72e8fe9.PNG)![카메라 벽인식](https://user-images.githubusercontent.com/63942174/164950850-bfc1ab8d-aa42-454d-af3b-7e78336157b4.PNG)
+
+
      TPS의 카메라 무브를 구현하였습니다.
-     카메라가 벽이나 오브젝트에 가까이가면 에임과의 거리가 줄어들면서 카메라가 확대됩니다.
+     에임에서 카메라 방향으로 Ray를 쏩니다. 오브젝트에 Ray가 부딪치면 
+     에임과 오브젝트간의 거리를 측정하고 카메라의 거리를 조절합니다.
 
 <details>
     <summary>카메라 컨트롤 (C#)</summary>
@@ -580,10 +583,10 @@ public class LobbyMgr : MonoBehaviour
 
         if (Physics.Raycast(m_AimPivot, a_RayDir, out hit, m_Dist_Cam + 0.2f))
         {
-            m_CurDist = hit.distance;
+            m_CurDist = hit.distance - 0.01f;
 
-            if (m_CurDist <= 0.5f)
-                m_CurDist = 0.5f;
+            if (m_CurDist <= 0.1f)
+                m_CurDist = 0.1f;
         }
         else
             m_CurDist = m_Dist_Cam;
