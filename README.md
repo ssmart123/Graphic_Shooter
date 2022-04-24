@@ -761,21 +761,19 @@ namespace SSM
 	// 리지드바디를 이용한 물리 이동
         private void RigidMove()
         {
-	    // 질량을 무시하고 강체에 즉각적인 속도 변경을 추가합니다.
+	    // 계산된 목표방향의 속도로 움직입니다.ㅡ
             rigidBody.AddForce(m_CalcTargetDirection, ForceMode.VelocityChange); 
         }
-	
-	
 	
         void Update()
         {
             KeyInput();
             CalcMoveDirection();
             PlayerRotation();
+            AimChange();
             StateMoveChange();
             StatePlayAnimation();
 
-            AimChange();
         }
 	
 	// 인풋에 관련된 조건을 한곳에 몰아넣음
@@ -803,22 +801,27 @@ namespace SSM
             if (Input.GetMouseButtonDown(1))
                 TryAim();
         }
-	// 카메라 전방방향으로 이동하기 위한 
+	// 카메라 전방방향으로 이동하기 위한 계산을 하는 메소드
         private void CalcMoveDirection()
         {
+	    // 카메라의 전방(Z) 벡터
             Vector3 a_CameraForward = playerCamera.transform.forward;
-            a_CameraForward.y = 0;
-
+            a_CameraForward.y = 0;  
+	    
+	    // 전방방향에 내적인 오른쪽 방향 구하기
             Vector3 a_CameraRight = Vector3.Cross(Vector3.up, a_CameraForward);
-
+	    // 캐릭터가 움직일 방향벡터 계산
             m_TargetMoveDirection = (a_CameraForward * m_VInput) + (a_CameraRight * m_HInput);
             m_TargetMoveDirection.Normalize();
-
-            m_CalcTargetDirection = new Vector3(m_TargetMoveDirection.x * m_PlayerApplySpeed, -0.3f, m_TargetMoveDirection.z * m_PlayerApplySpeed);
+	    // 캐릭터 상태에 따른 이동속도가 계산된 목표방향
+            m_CalcTargetDirection = new Vector3(m_TargetMoveDirection.x * m_PlayerApplySpeed, 
+						-0.3f,
+						m_TargetMoveDirection.z * m_PlayerApplySpeed);
         }
-	
+	// 캐릭터를 회전시키는 메소드
 	private void PlayerRotation()
         {
+  	    // 캐릭터가 달리는 상황일 때 이동방향을 바라보고 회전한다.
             if (e_PlayerState == PlayerState.Sprint)
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation,
@@ -826,24 +829,27 @@ namespace SSM
                                                       Time.deltaTime * m_RotSpeed);
             }
             else
-            {
+            {   // 캐릭터가 카메라의 전방 방향을 바라보고 회전한다.
+		// 카메라의 y축 각도를 가져온다.
                 float a_yawCamera = playerCamera.transform.eulerAngles.y;
+		// 캐릭터의 y축 각도를 카메라의 y축 각도로 RotSpeed의 빠르기로 회전한다. 
                 transform.rotation = Quaternion.Slerp(transform.rotation,
                                                       Quaternion.Euler(new Vector3(0, a_yawCamera, 0)),
                                                       Time.deltaTime * m_RotSpeed);
             }
         }
-	
+	// 캐릭터가 달리는 상태일때 호출되는 함수
 	  private void TrySprint()
         {
             isMoveSprint = true;
-
+	    // 캐릭터가 움직이지 않을 경우 제약조건
             if (m_TargetMoveDirection.magnitude <= 0.1)
             {
                 isMoveSprint = false;
                 e_PlayerState = PlayerState.Normal;
                 return;
             }
+	    // 				      
             if (isMoveSprint == true && m_VInput <= 0.8f)
             {
                 isMoveSprint = false;
