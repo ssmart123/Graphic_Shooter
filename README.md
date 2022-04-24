@@ -723,7 +723,6 @@ namespace SSM
         // 이동 방향 벡터
         private Vector3 m_TargetMoveDirection = Vector3.zero;   // 카메라 전방방향을 바라보는 방향벡터
         private Vector3 m_CalcTargetDirection = Vector3.zero;   // 이동속도, 중력을 적용한 벡터
-        private Vector3 m_SaveJumpDirectino = Vector3.zero;     // 점프시 이동방향을 임시 저장하는 벡터
 
         // 캐릭터 회전 속도
         private float m_RotSpeed = 15f;
@@ -770,7 +769,6 @@ namespace SSM
             KeyInput();
             CalcMoveDirection();
             PlayerRotation();
-            AimChange();
             StateMoveChange();
             StatePlayAnimation();
 
@@ -838,7 +836,7 @@ namespace SSM
                                                       Time.deltaTime * m_RotSpeed);
             }
         }
-	// 캐릭터가 달리는 상태일때 호출되는 함수
+	// 캐릭터가 달리는 상태일때 호출되는 
 	  private void TrySprint()
         {
             isMoveSprint = true;
@@ -849,80 +847,91 @@ namespace SSM
                 e_PlayerState = PlayerState.Normal;
                 return;
             }
-	    // 				      
+	    // 달리는 상태에서 w를 땠을때 제약조건	      
             if (isMoveSprint == true && m_VInput <= 0.8f)
             {
                 isMoveSprint = false;
                 e_PlayerState = PlayerState.Normal;
                 return;
             }
-
+	    // 캐릭터 상태를 스프린트 상태로 설정
             e_PlayerState = PlayerState.Sprint;
+	    // 애니메이터의 1번 상체 레이어 끄기
             playerAnimator.SetLayerWeight(1, 0);
         }
-	
+	// 캐릭터의 달리기를 캔슬시키는 메소드
         private void CancleSprint()
         {
             isMoveSprint = false;
+	    // 캐릭터의 상태를 일반 상태로 변경
             e_PlayerState = PlayerState.Normal;
-
-            rigSprintLayer.weight -= Time.deltaTime / m_SprintDuration;
-
+	    // 애니메이터의 1번 상체 레이어 켜기
             playerAnimator.SetLayerWeight(1, 1);
         }
 	
+	// 캐릭터를 앉게 해주는 메소드
         private void TryCrouch()
         {
             isMoveCrouch = !isMoveCrouch;
+	    // 캐릭터의 상태를 앉기 상태로 변경
             if (isMoveCrouch == true)
                 e_PlayerState = PlayerState.Crouch;
             else
                 e_PlayerState = PlayerState.Normal;
         }
 	
-	
+	// 캐릭터를 점프시키는 메소드
         private void TryJump()
         {
             e_PlayerState = PlayerState.Jump;
-
-            rigidBody.AddForce(new Vector3(m_SaveJumpDirectino.x, m_PlayerJumpForce, m_SaveJumpDirectino.z), ForceMode.Impulse);
-
+	    // 캐릭터가 Y축의 방향으로 PlayerForce의 힘을 한순간에 받음
+            rigidBody.AddForce(new Vector3(0, 
+					   m_PlayerJumpForce, 
+				           0), ForceMode.Impulse);
+	    // 애니메이터의 "doJump"트리거를 호출
             playerAnimator.SetTrigger("doJump");
         }
+	// 캐릭터가 공격을 할때 호출되는 메소드
 	 private void TryFire()
         {
-
+	    // 연사간격 계산
             m_CurFireRate -= Time.deltaTime;
-
+	    // UI를 클릭할 시 발사가 안되도록 막기
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
-
+	    // 연사간격이 0이하가 될 경우
             if (m_CurFireRate <= 0)
             {
+	        // gunCtrl의 Fire()메소드를 호출
                 gunCtrl.Fire();
+		// 연사간격 초기화
                 m_CurFireRate = gunCtrl.FireRateP;
             }
         }
+	// 조준을 할 경우
         private void TryAim()
         {
             isAim = !isAim;
-        }
-        private void AimChange()
-        {
-            if (isAim == true)
+				  
+	    // AnimationRigging AimLayer의 weight변경			  
+            if (isAim == true)  // 에임모드일시
                 rigAimLayer.weight += Time.deltaTime / m_AimDuration;
-            else
+            else		// 에임모드 해제시
                 rigAimLayer.weight -= Time.deltaTime / m_AimDuration;
         }
 		
-	// 캐릭터 상태 
+	// 캐릭터 상태 머신
         private void StateMoveChange()
         {
+	    // switch-case문을 사용하여 상태 전환에 따른 변수 변경
             switch (e_PlayerState)
             {
+		// 일반 상태일 경우
                 case PlayerState.Normal:
                     m_PlayerApplySpeed = m_PlayerRunSpeed;
-                    rigSprintLayer.weight -= Time.deltaTime / m_SprintDuration;
+	   	    // Animation Rigging의 SpringLayer의 weight를 감소
+        	    rigSprintLayer.weight -= Time.deltaTime / m_SprintDuration;
+
                     break;
 
 
