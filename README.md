@@ -702,15 +702,29 @@ public class LobbyMgr : MonoBehaviour
     
 
 <details>
-    <summary>PlayerCtrl(C#)</summary>
+    <summary>플레이어 정보 및 컨트롤(C#)</summary>
   
 ``` C#
+public class PlayerInit : MonoBehaviour
+{
+    [Header("플레이어 이동속도 변수")]
+    [SerializeField] protected float m_PlayerCrouchSpeed;
+    [SerializeField] protected float m_PlayerWalkSpeed;
+    [SerializeField] protected float m_PlayerRunSpeed;    
+    [SerializeField] protected float m_PlayerSprintSpeed;
+    [SerializeField] protected float m_PlayerJumpForce;
+    [Header("플레이어 HP")] 
+    [SerializeField] protected int m_PlayerHP = 200;
+
+}
+--------------------------------------------	
 	
 // 플레이어의 행동상태를 결정하는 enum함수
 public enum PlayerState { Normal = 0, Sprint, Crouch, Jump }
 	
 namespace SSM
 {
+	// PlayerInit을 상속받음
     public class PlayerCtrl : PlayerInit
     {
         // 플레이어 상태
@@ -760,7 +774,7 @@ namespace SSM
 	// 리지드바디를 이용한 물리 이동
         private void RigidMove()
         {
-	    // 계산된 목표방향의 속도로 움직입니다.ㅡ
+	    // 계산된 목표방향의 속도로 움직입니다.
             rigidBody.AddForce(m_CalcTargetDirection, ForceMode.VelocityChange); 
         }
 	
@@ -931,22 +945,24 @@ namespace SSM
                     m_PlayerApplySpeed = m_PlayerRunSpeed;
 	   	    // Animation Rigging의 SpringLayer의 weight를 감소
         	    rigSprintLayer.weight -= Time.deltaTime / m_SprintDuration;
-
                     break;
 
-
+	   	// 달리는 상태일 경우
                 case PlayerState.Sprint:
                     m_PlayerApplySpeed = m_PlayerSprintSpeed;
+		    // Animation Rigging의 SpringLayer의 weight를 감소	  
                     rigSprintLayer.weight += Time.deltaTime / m_SprintDuration;
                     isMoveCrouch = false;
                     isAim = false;
                     break;
 
+		// 앉기 상태일 경우
                 case PlayerState.Crouch:
                     m_PlayerApplySpeed = m_PlayerCrouchSpeed;
                     isMoveSprint = false;
                     break;
 
+		// 점프 상태일 
                 case PlayerState.Jump:
                     isMoveCrouch = false;
                     isMoveSprint = false;
@@ -994,7 +1010,71 @@ namespace SSM
                     break;
             }
         }
-	
+	// 콜라이더가 Floor태그를 가진 오브젝트에 부딪치면 한번 발생
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision.transform.tag == "FLOOR" )
+            {
+                e_PlayerState = PlayerState.Normal;
+            }
+        }
+	// 몬스터의 공격범위가 캐릭터와 충돌할 때 한번 실행
+        private void OnTriggerEnter(Collider other)
+        {
+            //충돌한 Collider가 몬스터의 PUNCH이면 Player의 HP 차감
+            if (other.gameObject.tag == "PUNCH")
+            {
+                if (m_PlayerCurHP <= 0.0f)
+                    return;
+
+                m_PlayerCurHP -= 10;
+
+                //Image UI 항목의 fillAmount 속성을 조절해 생명 게이지 값 조절
+                //Debug.Log("Player HP = " + hp.ToString());
+
+                a_HPRatio = (float)m_PlayerCurHP / (float)m_PlayerHP;
+		// gameMgr의 HPFillP 프로퍼티에 값을 대입
+                gameMgr.HPFillP = a_HPRatio;
+
+                //Player의 생명이 0이하이면 사망 처리
+                if (m_PlayerCurHP <= 0)
+                {
+                    PlayerDie();
+                }
+            }//if (other.gameObject.tag == "PUNCH")
+
+	    // 플레이어가 가서는 안되는 위치에 간 경우
+            if (other.gameObject.tag == "DeadZone")
+            {
+                m_PlayerCurHP = 0;
+                a_HPRatio = (float)m_PlayerCurHP / (float)m_PlayerHP;
+
+                gameMgr.HPFillP = a_HPRatio;
+                PlayerDie();
+            }
+        }
+        //Player의 사망 처리 루틴
+        void PlayerDie()
+        {
+            // Debug.Log("Player Die !!");
+
+            playerAnimator.SetTrigger("doDie");
+
+            //MONSTER라는 Tag를 자진 모든 게임오브젝트를 찾아옴
+            GameObject[] monsters = GameObject.FindGameObjectsWithTag("MONSTER");
+
+            gameMgr.EndTextUpdate("패배");
+
+            //모든 몬스터의 OnPlayerDie 함수를 순차적으로 호출
+            foreach (GameObject monster in monsters)
+            {
+                monster.SendMessage("OnPlayerDie", SendMessageOptions.DontRequireReceiver);
+            }
+	    // 게임 상태 변경
+            GameMgr.s_GameState = GameState.GameEnd;
+        }
+    }
+	  
 	
 ```
     
@@ -1008,123 +1088,6 @@ namespace SSM
     <summary>IKTest</summary>
   
 ``` C#
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-// 본을 인스펙터창에 표시하기 위한 클래스
-[System.Serializable]
-public class HumanBone
-{
-    public HumanBodyBones bone;
-    public float weight = 1.0f;
-}
-
-public class IKTest : MonoBehaviour
-{
-    // 총기의 손 위치
-    [Header("WeaponHandle")]
-    public Transform LeftHandle;
-    public Transform RightHandle;
-    
-    private Transform spine;
-    private Transform head;
-
-    public Transform targetTransform;   // 타겟 위치
-    public Transform aimTransform;      // 총 견착 위치
-    public Transform Headbone;          // 머리 본 위치
-    
-    private Animator playerAnimator;
-
-    public int iterations = 10;     // 반복횟수
-    public float weight = 1.0f;     // 보정률
-
-    public HumanBone[] humanBones;  // 본의 갯수 배열
-    Transform[] boneTransforms;  // 설정한 본에 해당되는 트렌스폼
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        playerAnimator = GetComponent<Animator>();
-        spine = playerAnimator.GetBoneTransform(HumanBodyBones.Spine);
-
-
-        boneTransforms = new Transform[humanBones.Length]; // boneTransforms 배열의 크기 선언
-
-        for (int i = 0; i < boneTransforms.Length; i++)
-        {
-            boneTransforms[i] = playerAnimator.GetBoneTransform(humanBones[i].bone);  // 본의 transform 정의
-        }
-    }
-
-    // Update is called once per frame
-    void LateUpdate()
-    {
-        // 사망시 움직이지 못하도록
-        if (GameMgr.s_GameState == GameState.GameEnd) 
-            return;
-                                                  
-        // 견착
-        Vector3 targetPosition = targetTransform.position;  // 타겟의 위치를 가져온다.
-
-        for (int i = 0; i < iterations; i++)
-        {
-            for (int j = 0; j < boneTransforms.Length-1; j++)
-            {
-                Transform bone = boneTransforms[j];
-                float boneWeight = humanBones[j].weight * weight;
-                // 총이 에임을 바라보도록 만든다.
-                AimAtTarget(bone, aimTransform, targetPosition, boneWeight);
-            }
-
-            Transform hashs = boneTransforms[4];
-            // 머리가 에임을 바라보도록 한다.
-            AimAtTarget(hashs, Headbone, targetPosition,weight);
-        }
-
-    }
-
-    // 타겟을 바라보도록 하는 메소드
-    private void AimAtTarget(Transform bone,Transform aimPosition, Vector3 targetPosition, float weight)
-    {
-       // Vector3 aimDirection = aimTransform.forward;    // 에임의 전방벡터
-        Vector3 aimDirection = aimPosition.forward;    // 에임의 전방벡터
-        Vector3 targetDirection = targetPosition - aimPosition.position; // 타겟 위치과 에임 위치를 빼서 타겟 방향을 구함
-        Quaternion aimTowards = Quaternion.FromToRotation(aimDirection, targetDirection);  // 에임이 바라볼 방향
-        Quaternion blendedRotation = Quaternion.Slerp(Quaternion.identity, aimTowards, weight);
-        bone.rotation = blendedRotation * bone.rotation;
-    }
-
-    private void OnDrawGizmos()
-    {
-        // 어깨와 에임을 잇는 선
-        Gizmos.DrawLine(aimTransform.position, targetTransform.position);
-    }
-
-    // 팔의 IK를 적용
-    private void OnAnimatorIK(int layerIndex)
-    {
-
-        if (GameMgr.s_GameState == GameState.GameEnd)
-            return;
-
-        // 팔 IK애니메이션 설정
-        playerAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
-        playerAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
-
-
-        playerAnimator.SetIKPosition(AvatarIKGoal.LeftHand,LeftHandle.position);
-        playerAnimator.SetIKRotation(AvatarIKGoal.LeftHand,LeftHandle.rotation);
-
-        playerAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
-        playerAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
-
-        playerAnimator.SetIKPosition(AvatarIKGoal.RightHand,RightHandle.position);
-        playerAnimator.SetIKRotation(AvatarIKGoal.RightHand,RightHandle.rotation);
-
-    }
-}
 
 ```
     
