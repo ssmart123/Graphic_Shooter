@@ -1087,7 +1087,11 @@ namespace SSM
 
 ![왼손 IK](https://user-images.githubusercontent.com/63942174/165032999-1d21f179-7152-4d60-bdab-23de2a2a3a73.PNG)![오른손IK](https://user-images.githubusercontent.com/63942174/165033004-2973a9d2-d48c-47b1-bd1b-6fe49863ad5a.PNG)
 
-	
+	애니메이션을 수정하지 않고 자연스럽게 자세를 만들기 위해서 AnimationRigging기능을 사용했습니다. 
+	무기에 손잡이 오브젝트를 추가해서 총을 잡는 팔을 자연스럽게 위치하도록 만들었고 
+	총구가 에임포인트를 향하도록 구현하였습니다. 조준상태는 RigLayer의 Weight를 조절함으로써
+	총을 들고있는 자세를 바꿨습니다.
+
 
 
 
