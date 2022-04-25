@@ -1083,9 +1083,11 @@ namespace SSM
     
 ## 3-3. Animation Rigging을 사용한 애니메이션
 ![Rigging이미지](https://user-images.githubusercontent.com/63942174/165030289-1070cbb3-4b0a-4f99-a59f-5882b1763428.PNG)
-![플레이어 캐릭터 인스펙터 창](https://user-images.githubusercontent.com/63942174/165030382-5570685c-169c-4573-ae05-6748f97433ce.PNG)
+![플레이어 캐릭터 인스펙터 창](https://user-images.githubusercontent.com/63942174/165032425-31ee3d07-ba7b-44ad-9566-31a85fda7f9a.PNG)![건 포즈](https://user-images.githubusercontent.com/63942174/165032443-b75b1888-8b0a-45a8-8ff6-143aae67bbb9.PNG)
 
-    
+![왼손 IK](https://user-images.githubusercontent.com/63942174/165032453-b8c543cb-c420-4d59-91eb-e7badc5cacb4.PNG)![오른손IK](https://user-images.githubusercontent.com/63942174/165032458-9417c984-d6b7-4b9b-90b2-3dbed978502a.PNG)
+
+
 
 <details>
     <summary>IKTest</summary>
