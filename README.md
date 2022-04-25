@@ -1608,15 +1608,253 @@ public class MonsterCtrl : MonoBehaviour
     
  </details>
 	
-## 5. GameMgr과 UI	
+## 5. GameMgr과 UI, 포스트 프로세싱	
 	
 	
 <details>
-    <summary>몬스터 컨트롤(C#)</summary>
+    <summary>게임 메니저(C#)</summary>
   
 ``` C#
+using UnityEngine.Networking;
+using UnityEngine.Rendering.PostProcessing;
 	
+public enum GameState { GameIng, GameEnd }
+	
+public class GameMgr : MonoBehaviour
+{	
+	// 포스트프로세싱 관련
+        public PostProcessProfile profile = null;
+        public Slider PostProcessSlider = null;
+
+        public MonsterMgr monsterMgr = null;
+        public CameraCtrl camCtrl = null;
+
+        //누적 점수를 기록하기 위한 변수
+        private int m_TotalScore = 0;
+
+        // HP바 FillAmount 변수
+        private float m_HPFillAmount = 1;
+        public float HPFillP { set { m_HPFillAmount = value; } get { return m_HPFillAmount; } }
+
+        // 상태변수
+        private bool isPause = false;
+
+        private string BestScoreURL;
+	// 네트워크 업데이트가 중복 실행되는것을 막기 위한 변수
+        bool isNetUpdateLock = false;
+	
+        private void Awake()
+        {
+            s_GameState = GameState.GameIng;
+        }
+	
+        void Start()
+        {
+	    // 시작시 스코어를 0으로 초기화
+	    DispScore(0);
+
+	    // 마우스 민감도 InputField
+            IF_HSensitive.onValueChanged.AddListener(IF_SenceH);
+            IF_VSensitive.onValueChanged.AddListener(IF_SenceV);
+
+
+            Btn_Back.onClick.AddListener(() =>
+            {
+                isPause = false;
+                PausePanel.SetActive(false);
+            });
+            Btn_BackToTitle.onClick.AddListener(GoToTitle);
+            Btn_BackToLobby.onClick.AddListener(GoToLobby);
+
+
+            //--- 슬라이더 설정
+            PostProcessSlider.maxValue = 50;
+            PostProcessSlider.minValue = 0;
+            PostProcessSlider.wholeNumbers = true;
+	
+	    // MySQL 연결
+            BestScoreURL = "http://ssmart123.dothome.co.kr/_GraphicShooter/GS_UpdateBestScore.php";
+        }
+	
+	void Update()
+        {
+            ScoreUpdate();
+            CursorOption();
+	
+            if (Input.GetKeyDown(KeyCode.Escape))
+                isPause = !isPause;
+
+            PauseUpdate();
+
+            Img_HPGage.fillAmount = HPFillP;
+
+            PostPorseccOption();
+        }
+	
+	// 게임중에는 커서가 안보이도록 기능을 하는 메서드
+	 private void CursorOption()
+        {
+            if (isPause == true)
+                Cursor.lockState = CursorLockMode.None;
+            else
+                Cursor.lockState = CursorLockMode.Locked;
+
+            Cursor.visible = isPause;
+        }
+	// ESC를 눌러 일시정지를 시키는 					       
+        private void PauseUpdate()
+        {
+	    // 일시정지 판넬 활성화					       
+            PausePanel.SetActive(isPause);
+	    // 일시정지 여부에 따른 타임스케일 설정
+            if (isPause == true)		
+                Time.timeScale = 0;
+            else
+                Time.timeScale = 1;
+        }
+	// 마우스 수평감도 설정
+        private void IF_SenceH(string a_Value)
+        {
+            IF_HSensitive.text = a_Value;
+            float a_sensH = float.Parse(a_Value);
+            camCtrl.HSensP = a_sensH;
+        }
+        // 마우스 수직감도 설정
+        private void IF_SenceV(string a_Value)
+        {
+            IF_VSensitive.text = a_Value;
+            float a_sensV = float.Parse(a_Value);
+            camCtrl.VSensP = a_sensV;
+        }
+	// 게임 오버가 되었을 때 실행되는 메서드
+	public void EndTextUpdate(string a_menutext)
+        {
+            isPause = true;
+            PausePanel.SetActive(isPause);
+            ConfigPanel.SetActive(false);
+            EndPanel.SetActive(true);
+            Text_Menu.text = a_menutext;
+        }
+
+	// 스코어 업데이트 메서드
+        private void ScoreUpdate()
+        {
+	    // 최대 점수 제한
+            if (m_TotalScore >= 9999)
+            {
+                m_TotalScore = 9999; 
+                GlobalValue.g_BestScore = m_TotalScore;
+                EndTextUpdate("승리");
+            }
+	    // 데이터베이스의 최고 스코어보다 인게임 스코어가 높을 경우
+            if (GlobalValue.g_BestScore < m_TotalScore)
+            {
+                GlobalValue.g_BestScore = m_TotalScore;
+                StartCoroutine(UpdateBestScoreCo());
+            }
+		
+            Text_BestScore.text = "BestScore : <color=red>" + GlobalValue.g_BestScore.ToString("D4") + "</color>";
+            Text_CurrentScore.text = "Score : <color=green>" + m_TotalScore.ToString("D4") + "</color>";
+        }
+	// 데이터베이스에 최고스코어를 업데이트 하기 위한 코루틴
+        IEnumerator UpdateBestScoreCo()
+        {
+
+            WWWForm form = new WWWForm();
+
+            form.AddField("input_user", GlobalValue.g_Unique_ID, System.Text.Encoding.UTF8);
+            form.AddField("input_score", GlobalValue.g_BestScore);
+
+	    // 데이터 업데이트가 반복적으로 실행되지 않고 한번만 업로드 되도록 제약					       
+            isNetUpdateLock = true;
+
+            if (isNetUpdateLock == true)
+            {
+		// 최고 점수를 데이터베이스에 업로드
+                UnityWebRequest a_www = UnityWebRequest.Post(BestScoreURL, form);
+                yield return a_www.SendWebRequest();
+            }
+            isNetUpdateLock = false;
+        }
+	// 포스트프로세싱의 처리를 하는 메서드
+	private void PostPorseccOption()
+        {
+            PostProcessVolume volume = Camera.main.GetComponent<PostProcessVolume>();
+
+            if (monsterMgr.IsSkillUseP == true)			// 스킬 사용중
+                volume.enabled = monsterMgr.IsSkillUseP;
+            else						// 스킬 종료
+                volume.enabled = monsterMgr.IsSkillUseP;
+            
+	    // Bloom의 Value를 조정한다
+            volume.profile.GetSetting<Bloom>().intensity.value = PostProcessSlider.value;
+        }
+
+        // 점수 누적 및 화면 표시
+        public void DispScore(int score)
+        {
+            m_TotalScore += score;
+            textScore.text = "SCORE <color=#ff0000>" + m_TotalScore.ToString("D4") + "</color>";
+        }
+	// 타이틀로 가는 버튼을 눌렀을 때 발생하는 메서드
+        private void GoToTitle()
+        {
+            Time.timeScale = 1;
+	    // 저장되어있는 유저 정보를 초기화 시킴
+            GlobalValue.g_Unique_ID = "";
+            GlobalValue.g_UserNick = "";
+            GlobalValue.g_BestScore = 0;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Title");
+        }
+	// 로비로 돌아가기를 눌렀을 때 발생하는 메서드
+        private void GoToLobby()
+        {
+            Time.timeScale = 1;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+        }
 ```
     
  </details>
 	
+	
+<details>
+    <summary>최고점수 업데이트(MySQL)</summary>
+``` MySQL
+<?php
+	// 클라이언트에서 보낸 정보를 변수로 저장
+	$u_id = $_POST["input_user"];
+	$Bscore = $_POST["input_score"];
+	// 서버의 데이터베이스 아이디와 비밀번호를 확인
+	$con = mysqli_connect("localhost", "ssmart123", "Helkas2073!", "ssmart123");
+	
+	// 접속을 하지 못했을 경우 에러 메세지
+	if(!$con)
+		die( "Could not Connect" . mysqli_connect_error() ); 
+
+	// GraphicShooter의 user_id가 클라이언트에서 받아온 u_id와 같은지 확인
+	$check = mysqli_query($con, "SELECT user_id FROM GraphicShooter WHERE user_id = '".$u_id."'");
+
+	// 확인된 check의 갯수를 카운트함
+	$numrows = mysqli_num_rows($check);
+	// check가 1개도 없을 경우
+	if ($numrows == 0)
+	{	
+ 		die("ID does not exist. \n");
+	}
+
+	// 데이터베이스에 BestScore를 set
+	if( $row = mysqli_fetch_assoc($check) ) 
+	{
+		mysqli_query($con, 
+		"UPDATE GraphicShooter SET `best_score` = '".$Bscore."' WHERE `user_id`= '".$u_id."'");  
+
+
+		echo ("UpDate Success.");			
+	}
+
+	mysqli_close($con);
+?>
+	
+```
+    
+ </details>
