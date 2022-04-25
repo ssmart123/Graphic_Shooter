@@ -1609,8 +1609,9 @@ public class MonsterCtrl : MonoBehaviour
  </details>
 	
 ## 5. GameMgr과 UI, 포스트 프로세싱	
-	
-	
+![일시정지](https://user-images.githubusercontent.com/63942174/165112902-77738869-2073-45a5-9f82-9d65a4ec81a5.PNG)![패배화면](https://user-images.githubusercontent.com/63942174/165112998-b2645209-c237-4f64-a587-dd3e4ead3e79.png)
+
+
 <details>
     <summary>게임 메니저(C#)</summary>
   
