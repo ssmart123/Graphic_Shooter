@@ -1094,8 +1094,10 @@ namespace SSM
 
     
     
-## 4. 몬스터 컨트롤 및 생성, 스킬 이펙트 구현
+## 4. 몬스터 컨트롤 및 생성, 스킬 이펙트 구현  
+![몬스터 프리팹](https://user-images.githubusercontent.com/63942174/165088180-1c9c2a66-e309-4fca-bee4-404b84fd6328.PNG)
 
+	
     몬스터를 일정시간마다 생성하고 랜덤한 스폰 포인트에 생성하는 매니저입니다. 
     생성된 몬스터는 오브젝트 풀에 저장하고 사용하는 방식으로 구현하였습니다.
     몬스터의 쉐이더와 스킬사용 및 사망시의 커스텀 쉐이더을 만들고 스킬 사용시나 몬스터 사망시에
@@ -1519,18 +1521,18 @@ public class MonsterCtrl : MonoBehaviour
         blood1.GetComponent<ParticleSystem>().Play();
         Destroy(blood1, 3.0f);
 
-        //데칼 생성 위치 - 바닥에서 조금 올린 위치 산출
+        // 데칼 생성 위치 - 바닥에서 조금 올린 위치 산출
         Vector3 decalPos = monsterTr.position + (Vector3.up * 0.05f);
-        //데칼의 회전값을 무작위로 설정
+        // 데칼의 회전값을 무작위로 설정
         Quaternion decalRot = Quaternion.Euler(90, 0, Random.Range(0, 360));
 
-        //데칼 프리팹 생성
+        // 데칼 프리팹 생성
         GameObject blood2 = (GameObject)Instantiate(bloodDecal, decalPos, decalRot);
-        //데칼의 크기가 불규칙적으로 나타나게끔 스케일 조정
+        // 데칼의 크기가 불규칙적으로 나타나게끔 스케일 조정
         float scale = Random.Range(1.5f, 3.5f);
         blood2.transform.localScale = Vector3.one * scale;
 
-        //5초 후에 혈흔효과 프리팹을 삭제
+        // 5초 후에 혈흔효과 프리팹을 삭제
         Destroy(blood2, 5.0f);
     }
 
@@ -1571,10 +1573,10 @@ public class MonsterCtrl : MonoBehaviour
             coll.enabled = false;
         }
 
-        //GameUI의 스코어 누적과 스코어 표시 함수 호출
+        // GameUI의 스코어 누적과 스코어 표시 함수 호출
         gameMgr.DispScore(50);
 
-        //몬스터 오브젝트 풀로 환원시키는 코루틴 함수 호출
+        // 몬스터 오브젝트 풀로 환원시키는 코루틴 함수 호출
         StartCoroutine(this.PushObjectPool());
     }
 
@@ -1605,3 +1607,16 @@ public class MonsterCtrl : MonoBehaviour
 ```
     
  </details>
+	
+## 5. GameMgr과 UI	
+	
+	
+<details>
+    <summary>몬스터 컨트롤(C#)</summary>
+  
+``` C#
+	
+```
+    
+ </details>
+	
