@@ -35,7 +35,7 @@ using UnityEngine.Networking;
 public class TitleMgr : MonoBehaviour
 {
     `````````````````
-    // MYSQL 도메인에 있는 PHP파일 주소
+    // MSQL 도메인에 있는 PHP파일 주소
     private string Url_LogIn = "http://ssmart123.dothome.co.kr/_GraphicShooter/GS_LogIn.php";
     private string Url_CreateAccount = "http://ssmart123.dothome.co.kr/_GraphicShooter/GS_CreateAccount.php";
     ``````````````
@@ -1094,7 +1094,7 @@ namespace SSM
 
     
     
-## 4. 몬스터 컨트롤 및 스킬 이펙트 구현
+## 4. 몬스터 컨트롤 및 생성, 스킬 이펙트 구현
 
     몬스터를 일정시간마다 생성하고 랜덤한 스폰 포인트에 생성하는 매니저입니다. 
     생성된 몬스터는 오브젝트 풀에 저장하고 사용하는 방식으로 구현하였습니다.
@@ -1145,6 +1145,9 @@ namespace SSM
     //게임 종료 여부 변수
     public bool isGameOver = false;
 
+    //일정한 간격으로 몬스터의 행동 상태를 체크하고 monsterState 값 변경
+    float m_AI_Delay = 0.0f;
+	
     private void Awake()
     {
         //Hierarchy 뷰의 SpawnPoint를 찾아 하위에 있는 모든 Transform 컴포넌트를 찾아옴
@@ -1250,8 +1253,6 @@ namespace SSM
         }
     }
 }
-
-
     
 ```
     
@@ -1259,9 +1260,347 @@ namespace SSM
 
 	
 <details>
-    <summary>IKTest</summary>
+    <summary>몬스터 컨트롤(C#)</summary>
   
 ``` C#
+// Navigation을 사용하기 위한 네임스페이스
+using UnityEngine.AI;
+	
+public class MonsterCtrl : MonoBehaviour
+{
+    //몬스터의 상태 정보가 있는 Enumerable 변수 선언
+    public enum MonsterState { idle, trace, attack, die };
+
+    //몬스터의 현재 상태 정보를 저장할 Enum 변수
+    public MonsterState monsterState = MonsterState.idle;
+
+    //속도 향상을 위해 각종 컴포넌트를 변수에 할당
+    private Transform monsterTr;
+    private Transform playerTr;
+    private NavMeshAgent nvAgent;
+    private Animator animator;
+    private MonsterMgr monsterMgr;
+
+    //추적 사정거리
+    public float traceDist = 10.0f;
+
+    //공격 사정거리
+    public float attackDist = 2.0f;
+
+    //몬스터의 사망 여부
+    private bool isDie = false;
+
+    //혈흔 효과 프리팹
+    public GameObject bloodEffect;
+    //얇은 데칼 효과 프리팹
+    public GameObject bloodDecal;
+
+    //몬스터 생명 변수
+    private int hp = 100;
+
+    //GameMgr에 접근하기 위한 변수
+    private GameMgr gameMgr;
+
+    // 스킬 이펙트를 적용하기 위한 Material과 SkinnedMeshRenderer 선언
+    private SkinnedMeshRenderer[] m_SMRList = null;
+    private Material[] m_Materials;
+
+    void Awake()
+    {
+	// 추적 거리 설정
+        traceDist = 100.0f;
+	// 공격 사거리
+        attackDist = 1.8f;
+
+        //몬스터의 Transform 할당
+        monsterTr = this.gameObject.GetComponent<Transform>();
+
+        //추적 대상인 Player의 Transform 할당
+        playerTr = GameObject.FindWithTag("Player").GetComponent<Transform>();
+
+        //NavMeshAgent 컴포넌트 할당
+        nvAgent = this.gameObject.GetComponent<NavMeshAgent>();
+
+        //Animator 컴포넌트 할당
+        animator = this.gameObject.GetComponent<Animator>();
+
+	// 컴포넌트를 찾아서 연결하기
+        gameMgr = GameObject.Find("GameMgr").GetComponent<GameMgr>();
+
+        m_SMRList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
+
+        monsterMgr = GameObject.Find("MonsterMgr").GetComponent<MonsterMgr>();
+    }
+
+    void Update()
+    {
+	// 게임 종료시 정지
+        if (GameMgr.s_GameState == GameState.GameEnd)
+            return;
+
+        ChangeShader();
+
+	// 스킬 사용시 몬스터 행동 정지
+        if (monsterMgr.IsSkillUseP == true)
+            return;
+	
+        CheckMonStateUpdate();
+        MonActionUpdate();
+        
+    }
+
+    // 몬스터 상태에 따른 쉐이더 변화
+    void ChangeShader()
+    {
+        if (monsterMgr.IsSkillUseP == false && monsterState != MonsterState.die)
+        { 
+	    // 몬스터가 일반 상태일 때
+            animator.speed = 1;
+            for (int i = 0; i < m_SMRList.Length; i++)
+            {
+                m_Materials = m_SMRList[i].materials;
+                for (int a = 0; a < m_Materials.Length; a++)
+                {
+                    if (MonsterMgr.g_DefShader != null &&
+                        m_Materials[a].shader != MonsterMgr.g_DefShader)
+                    {
+                        m_Materials[a].shader = MonsterMgr.g_DefShader;
+                    }
+                }
+            }
+        } 
+        else if (monsterMgr.IsSkillUseP == true && monsterState != MonsterState.die)
+        {
+	    // 몬스터가 돌이 되었을 때
+            animator.speed = 0;
+            nvAgent.isStopped = true;
+            for (int i = 0; i < m_SMRList.Length; i++)
+            {
+                m_Materials = m_SMRList[i].materials;
+                for (int a = 0; a < m_Materials.Length; a++)
+                {
+                    if (MonsterMgr.g_GrayscaleShader != null &&
+                        m_Materials[a].shader != MonsterMgr.g_GrayscaleShader)
+                    {
+                        m_Materials[a].shader = MonsterMgr.g_GrayscaleShader;
+                    }
+                }
+            }
+        }
+        else if (monsterState == MonsterState.die)  
+        {
+            // 몬스터가 죽었을 때
+            animator.speed = 1;
+            // 몬스터의 쉐이더에 변경시킬 적용 색깔
+            Color a_CalcColor = new Color(0, 1.0f, 0, 1.0f);
+            for (int i = 0; i < m_SMRList.Length; i++)
+            {
+                // 몬스터의 Material을 찾는다
+                m_Materials = m_SMRList[i].materials;
+
+                for (int a = 0; a < m_Materials.Length; a++)
+                {
+                    if (MonsterMgr.g_DeadShader != null)
+                    {
+                        m_Materials[a].shader = MonsterMgr.g_DeadShader;
+                        m_Materials[a].SetColor("_AddColor", a_CalcColor);
+                    }
+                }
+            }
+        }
+    }
+
+    // 몬스터의 상태를 업데이트
+    void CheckMonStateUpdate()
+    {
+        if (isDie == true)
+            return;
+	// 몬스터의 상태를 변경하기 위한 
+        m_AI_Delay -= Time.deltaTime;
+	
+        if (0.0f < m_AI_Delay)
+            return;
+
+        m_AI_Delay = 0.1f;
+
+        //몬스터와 플레이어 사이의 거리 측정
+        float dist = Vector3.Distance(playerTr.position, monsterTr.position);
+
+        if (dist <= attackDist) //공격거리 범위 이내로 들어왔는지 확인
+        {
+            monsterState = MonsterState.attack;
+        }
+        else if (dist <= traceDist) //추적거리 범위 이내로 들어왔는지 확인
+        {
+            monsterState = MonsterState.trace; //몬스터의 상태를 추적으로 설정
+        }
+        else
+        {
+            monsterState = MonsterState.idle; //몬스터의 상태를 idle 모드로 설정
+        }
+    }
+
+    //몬스터의 상태값에 따라 적절한 동작을 수행하는 함수
+    void MonActionUpdate()
+    {
+        if (isDie == true)
+            return;
+
+        switch (monsterState)
+        {
+            // idle 상태
+            case MonsterState.idle:
+                // 추적 중지
+                nvAgent.isStopped = true;  //nvAgent.Stop(); 
+                // Animator의 IsTrace 변수를 false로 설정
+                animator.SetBool("IsTrace", false);
+                break;
+
+            //추적 상태
+            case MonsterState.trace:
+                // 추적 대상의 위치를 넘겨줌
+                nvAgent.destination = playerTr.position;
+                nvAgent.isStopped = false;  //nvAgent.Resume();
+                // Animator의 IsTrace 변수를 false로 설정
+                animator.SetBool("IsAttack", false);
+                // Animator의 IsTrace 변수를 true로 설정
+                animator.SetBool("IsTrace", true);
+                // 애니메이션 속도는 Animator의 Walk노드에서 개별적으로 Speed 설정해 주었다.
+                break;
+
+            //공격 상태
+            case MonsterState.attack:
+                {
+                    nvAgent.isStopped = true;  //nvAgent.Stop();    
+                    // Animator의 IsAttack 변수를 true로 설정 Attack State로 전이
+                    animator.SetBool("IsAttack", true);
+                    // 애니메이션 속도는 Animator의 Attack노드에서 개별적으로 Speed 설정해 주었다.
+
+                    // 몬스터가 주인공을 공격하면서 바라 보도록 해야 한다.   
+                    float m_RotSpeed = 6.0f;              //초당 회전 속도
+                    Vector3 a_CacVLen = playerTr.position - monsterTr.position;
+                    a_CacVLen.y = 0.0f;
+                    Quaternion a_TargetRot =
+                                Quaternion.LookRotation(a_CacVLen.normalized);
+                    transform.rotation = Quaternion.Slerp(transform.rotation,
+                                              a_TargetRot, Time.deltaTime * m_RotSpeed);
+                }
+                break;
+        }
+
+    }
+    //Bullet과 충돌 체크
+    void OnCollisionEnter(Collision coll)
+    {
+        if (coll.gameObject.tag == "BULLET")
+        {
+            //혈흔 효과 함수 호출
+            CreateBloodEffect(coll.transform.position);
+
+            //맞은 총알의 Damage를 추출해 몬스터 hp ckrka
+            hp -= coll.gameObject.GetComponent<BulletCtrl>().m_BulletDmg;
+            if (hp <= 0)
+            {
+                MonsterDie();
+            }
+          //  Debug.Log(hp);
+            //Bullet 삭제
+            Destroy(coll.gameObject);
+            //IsHit Trigger를 발생시키면 Any State에 gothit로 전이됨
+            animator.SetTrigger("IsHit");
+        }
+    }
+
+    void CreateBloodEffect(Vector3 pos)
+    {
+        //혈흔 효과 생성
+        GameObject blood1 =
+                (GameObject)Instantiate(bloodEffect, pos, Quaternion.identity);
+        blood1.GetComponent<ParticleSystem>().Play();
+        Destroy(blood1, 3.0f);
+
+        //데칼 생성 위치 - 바닥에서 조금 올린 위치 산출
+        Vector3 decalPos = monsterTr.position + (Vector3.up * 0.05f);
+        //데칼의 회전값을 무작위로 설정
+        Quaternion decalRot = Quaternion.Euler(90, 0, Random.Range(0, 360));
+
+        //데칼 프리팹 생성
+        GameObject blood2 = (GameObject)Instantiate(bloodDecal, decalPos, decalRot);
+        //데칼의 크기가 불규칙적으로 나타나게끔 스케일 조정
+        float scale = Random.Range(1.5f, 3.5f);
+        blood2.transform.localScale = Vector3.one * scale;
+
+        //5초 후에 혈흔효과 프리팹을 삭제
+        Destroy(blood2, 5.0f);
+    }
+
+    //플레이어가 사망했을 때 실행되는 함수
+    void OnPlayerDie()
+    {
+        if (isDie == true)
+            return;
+
+        //몬스터의 상태를 체크하는 코루틴 함수를 모두 정지시킴
+        StopAllCoroutines();
+
+        //추적을 정지하고 애니메이션을 수행
+        nvAgent.isStopped = true;  //nvAgent.Stop();
+
+        animator.SetTrigger("IsPlayerDie");
+    }
+
+    //몬스터 사망 시 처리 루틴
+    void MonsterDie()
+    {
+        gameObject.tag = "Untagged";
+
+        //모든 코루틴을 정지
+        StopAllCoroutines();
+
+        isDie = true;
+
+        monsterState = MonsterState.die;
+        nvAgent.isStopped = true;  //nvAgent.Stop();
+        animator.SetTrigger("IsDie");
+
+        //몬스터에 추가된 Collider를 비활성화
+        gameObject.GetComponentInChildren<CapsuleCollider>().enabled = false;
+
+        foreach (Collider coll in gameObject.GetComponentsInChildren<SphereCollider>())
+        {
+            coll.enabled = false;
+        }
+
+        //GameUI의 스코어 누적과 스코어 표시 함수 호출
+        gameMgr.DispScore(50);
+
+        //몬스터 오브젝트 풀로 환원시키는 코루틴 함수 호출
+        StartCoroutine(this.PushObjectPool());
+    }
+
+    IEnumerator PushObjectPool()
+    {
+        yield return new WaitForSeconds(3.0f);
+
+        // 각종 변수 초기화
+        isDie = false;
+        hp = 100;
+        gameObject.tag = "MONSTER";
+        monsterState = MonsterState.idle;
+
+        // 몬스터에 추가된 Collider을 다시 활성화
+        gameObject.GetComponentInChildren<CapsuleCollider>().enabled = true;
+
+        foreach(Collider coll in gameObject.GetComponentsInChildren<SphereCollider>())
+        {
+            coll.enabled = true;
+        }
+
+        // 몬스터를 비활성화
+        gameObject.SetActive(false);
+    }
+}
+
 
 ```
     
