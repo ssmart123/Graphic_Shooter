@@ -1081,7 +1081,10 @@ namespace SSM
  </details>
     
     
-    
+## 3-3. Animation Rigging을 사용한 애니메이션
+![Rigging이미지](https://user-images.githubusercontent.com/63942174/165030289-1070cbb3-4b0a-4f99-a59f-5882b1763428.PNG)
+![플레이어 캐릭터 인스펙터 창](https://user-images.githubusercontent.com/63942174/165030382-5570685c-169c-4573-ae05-6748f97433ce.PNG)
+
     
 
 <details>
